@@ -3,34 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Swarm Economy</title>
+    <title>AI Swarm Economy Simulation</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app">
-        <header>
-            <h1>AI Swarm Economy</h1>
-            <p>Welcome to the AI-powered simulation where agents interact and influence a dynamic economy!</p>
-        </header>
+    <!-- Main Container -->
+    <div class="container">
+        <h1>AI Swarm Economy</h1>
+        <p>Welcome to the AI-powered simulation where agents interact and influence a dynamic economy!</p>
 
-        <section id="simulation-info">
+        <!-- Simulation Info -->
+        <div class="simulation-info">
             <h2>Simulation Info</h2>
-            <p>Total Resources: <span id="total-resources"></span></p>
-            <p>Token Value: <span id="token-value"></span></p>
-            <button id="simulate-btn">Simulate Next Step</button>
-        </section>
+            <p><strong>Total Resources:</strong> <span id="total-resources">Loading...</span></p>
+            <p><strong>Token Value:</strong> <span id="token-value">Loading...</span></p>
+            <button id="simulate-button">Simulate Next Step</button>
+        </div>
 
-        <section id="agents-info">
+        <!-- Agents Section -->
+        <div class="agents-section">
             <h2>Agents</h2>
-            <div id="agent-list"></div>
-        </section>
+            <div id="agents-container"></div>
+        </div>
 
-        <section id="heatmap">
+        <!-- Heatmap Section -->
+        <div class="heatmap-section">
             <h2>Agent Heatmap</h2>
-            <div id="heatmap-grid"></div>
-        </section>
+            <canvas id="heatmap" width="500" height="500" style="border:1px solid #ccc;"></canvas>
+        </div>
     </div>
 
+    <!-- Script -->
     <script src="script.js"></script>
 </body>
 </html>
