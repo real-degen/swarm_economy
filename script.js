@@ -1,69 +1,81 @@
-// script.js
+// Replace this with your Render backend URL
+const backendURL = "https://swarm-economy-backend.onrender.com"; // <-- ENTER YOUR RENDER BACKEND URL HERE
 
-// Fetch simulation data from the backend API
+// Fetch simulation data and update the UI
 async function fetchSimulationData() {
     try {
-        const response = await fetch('http://172.31.196.55:5000/api/data'); // Update with correct backend URL
+        const response = await fetch(`${backendURL}/simulation-data`);
+        if (!response.ok) {
+            throw new Error("Failed to fetch simulation data.");
+        }
         const data = await response.json();
 
         // Update total resources and token value
-        document.getElementById('total-resources').innerText = data.total_resources.toLocaleString();
-        document.getElementById('token-value').innerText = data.token_value.toFixed(10);
+        document.getElementById("total-resources").innerText = data.total_resources.toLocaleString();
+        document.getElementById("token-value").innerText = data.token_value.toFixed(7);
 
-        // Update agent list
-        const agentListContainer = document.getElementById('agent-list');
-        agentListContainer.innerHTML = '';
-        data.agents.forEach(agent => {
-            const agentDiv = document.createElement('div');
-            agentDiv.classList.add('agent');
-            agentDiv.innerHTML = `
-                <strong>${agent.role}</strong>
-                <p>Resources: ${agent.resources}</p>
-                <p>Tokens: ${agent.tokens}</p>
-                <p>Location: (${agent.x}, ${agent.y})</p>
-            `;
-            agentListContainer.appendChild(agentDiv);
-        });
+        // Update agents list
+        updateAgentsList(data.agents);
 
-        // Update the heatmap
+        // Update heatmap
         updateHeatmap(data.agents);
+
     } catch (error) {
-        console.error('Error fetching simulation data:', error);
+        console.error("Error fetching simulation data:", error);
     }
 }
 
-// Update the heatmap grid based on agent positions
-function updateHeatmap(agents) {
-    const heatmapGrid = document.getElementById('heatmap-grid');
-    heatmapGrid.innerHTML = '';
-
-    // Create a 10x10 grid of cells
-    const grid = Array.from({ length: 100 }, () => document.createElement('div'));
-    grid.forEach(cell => cell.classList.add('grid-cell'));
-
-    // Add agents' positions to the grid
-    agents.forEach(agent => {
-        const cellIndex = agent.y * 10 + agent.x; // Calculate grid position
-        grid[cellIndex].classList.add('agent');
-    });
-
-    grid.forEach(cell => heatmapGrid.appendChild(cell));
-}
-
-// Simulate a step and update the UI
-async function simulateStep() {
+// Simulate the next step
+async function simulateNextStep() {
     try {
-        const response = await fetch('http://172.31.196.55:5000/api/simulate', { method: 'POST' });
-        const result = await response.json();
-        console.log(result.message);
-        fetchSimulationData(); // Fetch and update the data after simulation
+        const response = await fetch(`${backendURL}/simulate`, { method: "POST" });
+        if (!response.ok) {
+            throw new Error("Failed to simulate next step.");
+        }
+        console.log("Simulation step completed.");
+        fetchSimulationData(); // Refresh the data
     } catch (error) {
-        console.error('Error simulating step:', error);
+        console.error("Error simulating next step:", error);
     }
 }
 
-// Set up the event listener for the "Simulate Next Step" button
-document.getElementById('simulate-btn').addEventListener('click', simulateStep);
+// Update agents list
+function updateAgentsList(agents) {
+    const agentsContainer = document.getElementById("agents-container");
+    agentsContainer.innerHTML = ""; // Clear previous data
 
-// Fetch initial simulation data on page load
+    agents.forEach(agent => {
+        const agentElement = document.createElement("div");
+        agentElement.classList.add("agent");
+        agentElement.innerHTML = `
+            <strong>ID:</strong> ${agent.id} |
+            <strong>Role:</strong> ${agent.role} |
+            <strong>Tokens:</strong> ${agent.tokens.toLocaleString()} |
+            <strong>Position:</strong> (${agent.position.x}, ${agent.position.y})
+        `;
+        agentsContainer.appendChild(agentElement);
+    });
+}
+
+// Update agent heatmap
+function updateHeatmap(agents) {
+    const canvas = document.getElementById("heatmap");
+    const ctx = canvas.getContext("2d");
+
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw agents as circles
+    agents.forEach(agent => {
+        ctx.beginPath();
+        ctx.arc(agent.position.x, agent.position.y, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = agent.role === "Producer" ? "green" : "red";
+        ctx.fill();
+    });
+}
+
+// Initialize the page
+document.getElementById("simulate-button").addEventListener("click", simulateNextStep);
+
+// Fetch initial data when the page loads
 fetchSimulationData();
